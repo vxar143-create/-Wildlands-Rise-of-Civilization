@@ -3,243 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GrassBox - Battle Royale FFA</title>
+    <title>GrassBox - Arena</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #0d1e08;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        canvas {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #1e3814; font-family: 'Segoe UI', Arial, sans-serif; }
+        canvas { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-        /* Меню з розмиттям */
         .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(13, 30, 8, 0.5);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: opacity 0.4s ease;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 25, 10, 0.65); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; z-index: 100; transition: opacity 0.4s ease;
         }
-
         .menu-card {
-            background: rgba(15, 33, 10, 0.9);
-            border: 2px solid rgba(76, 175, 80, 0.4);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            width: 360px;
-            position: relative;
+            background: rgba(20, 35, 15, 0.95); border: 2px solid #4caf50;
+            padding: 30px; border-radius: 16px; text-align: center; box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+            width: 360px; position: relative;
         }
-
-        .menu-card h1 {
-            color: #4CAF50;
-            font-size: 32px;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.7);
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            color: #b0bec5;
-            font-size: 13px;
-            margin-bottom: 5px;
-        }
-
+        .menu-card h1 { color: #81c784; font-size: 28px; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; color: #a5d6a7; font-size: 13px; margin-bottom: 5px; }
         .input-group input, .input-group select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid #33691e;
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            font-size: 15px;
-            outline: none;
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #388e3c;
+            background: rgba(0, 0, 0, 0.6); color: #fff; font-size: 14px; outline: none;
         }
-
         .btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #4CAF50, #2E7D32);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(76, 175, 80,.4);
-            margin-top: 10px;
-            transition: 0.2s;
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4); margin-top: 10px; transition: 0.2s;
         }
         .btn:hover { transform: translateY(-2px); }
 
-        /* Карртки режимів */
         .mode-card {
-            background: rgba(0,0,0,0.5);
-            border: 2px solid #33691e;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            text-align: left;
+            background: rgba(0,0,0,0.5); border: 2px solid #388e3c; border-radius: 10px;
+            padding: 14px; margin-bottom: 10px; cursor: pointer; text-align: left; transition: 0.2s;
         }
-        .mode-card:hover:not(.disabled) {
-            border-color: #4CAF50;
-            background: rgba(76, 175, 80, 0.15);
-        }
-        .mode-card.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-color: #555;
-        }
-        .mode-title { color: #fff; font-size: 18px; font-weight: bold; }
-        .mode-desc { color: #aaa; font-size: 12px; margin-top: 3px; }
+        .mode-card:hover { background: rgba(76, 175, 80, 0.2); }
+        .mode-title { color: #81c784; font-size: 16px; font-weight: bold; }
+        .mode-desc { color: #ccc; font-size: 12px; margin-top: 3px; }
 
-        /* Чекбокс спостерігача у кутку */
         .spectator-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #ffeb3b;
-            font-size: 12px;
-            font-weight: bold;
+            position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 6px; color: #ffeb3b; font-size: 12px; font-weight: bold;
         }
 
-        /* UI під час гри */
         #ui {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #fff;
-            font-size: 15px;
-            font-weight: bold;
-            z-index: 10;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 16px;
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
+            position: absolute; top: 20px; left: 20px; color: #fff; font-size: 14px; font-weight: bold;
+            z-index: 10; background: rgba(0,0,0,0.6); padding: 8px 14px; border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);
         }
 
         #inventory-ui {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.6);
-            padding: 12px;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 13px;
-            z-index: 10;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.1);
+            position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 12px;
+            border-radius: 8px; color: #fff; font-size: 13px; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         #spectator-controls {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            padding: 12px 24px;
-            border-radius: 30px;
-            color: #ffeb3b;
-            font-weight: bold;
-            display: none;
-            z-index: 20;
-            border: 1px solid #ffeb3b;
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); padding: 10px 20px; border-radius: 20px; color: #ffeb3b;
+            font-weight: bold; display: none; z-index: 20; border: 1px solid #ffeb3b;
         }
 
-        #chat-container {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 300px;
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        #chat-messages {
-            background: rgba(10, 20, 8, 0.7);
-            backdrop-filter: blur(6px);
-            padding: 10px;
-            border-radius: 10px 10px 0 0;
-            color: #fff;
-            font-size: 13px;
-            max-height: 140px;
-            overflow-y: auto;
-        }
-        #chat-input {
-            width: 100%;
-            padding: 8px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            border-radius: 0 0 10px 10px;
-            outline: none;
-        }
+        #chat-container { position: absolute; bottom: 20px; left: 20px; width: 280px; z-index: 10; opacity: 0; transition: opacity 0.5s; }
+        #chat-messages { background: rgba(10, 20, 10, 0.85); padding: 8px; border-radius: 8px 8px 0 0; color: #fff; font-size: 12px; max-height: 130px; overflow-y: auto; }
+        #chat-input { width: 100%; padding: 8px; background: rgba(0,0,0,0.9); border: 1px solid #388e3c; color: #fff; border-radius: 0 0 8px 8px; outline: none; font-size: 12px; }
 
         #joystick-base {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            width: 120px;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: none;
-            z-index: 20;
-            touch-action: none;
+            position: absolute; bottom: 40px; left: 40px; width: 110px; height: 110px;
+            background: rgba(255,255,255,0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; display: none; z-index: 20; touch-action: none;
         }
-        #joystick-stick {
-            position: absolute;
-            top: 35px;
-            left: 35px;
-            width: 50px;
-            height: 50px;
-            background: rgba(76, 175, 80, 0.7);
-            border-radius: 50%;
-            pointer-events: none;
-        }
+        #joystick-stick { position: absolute; top: 30px; left: 30px; width: 50px; height: 50px; background: rgba(76, 175, 80, 0.8); border-radius: 50%; pointer-events: none; }
     </style>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
 
-    <!-- Меню 1: Налаштування профілю -->
     <div id="profile-overlay" class="overlay">
         <div class="menu-card">
             <h1>GrassBox</h1>
@@ -248,19 +84,18 @@
                 <input type="text" id="nickname-input" maxlength="12" value="Гравець">
             </div>
             <div class="input-group">
-                <label>Колір кубика:</label>
+                <label>Колір бійця:</label>
                 <select id="color-input">
-                    <option value="#e53935">Червоний</option>
-                    <option value="#1e88e5">Синій</option>
-                    <option value="#43a047">Зелений</option>
-                    <option value="#fb8c00">Помаранчевий</option>
-                    <option value="#8e24aa">Фіолетовий</option>
+                    <option value="#388e3c">Зелений</option>
+                    <option value="#e65100">Помаранчевий</option>
+                    <option value="#1565c0">Синій</option>
+                    <option value="#c62828">Червоний</option>
                 </select>
             </div>
             <div class="input-group">
                 <label>Керування:</label>
                 <select id="control-input">
-                    <option value="pc">ПК (Клавіатура + Миша)</option>
+                    <option value="pc">ПК (WASD + Миша + F)</option>
                     <option value="mobile">Телефон (Джойстик)</option>
                 </select>
             </div>
@@ -268,153 +103,145 @@
         </div>
     </div>
 
-    <!-- Меню 2: Вибір режиму гри -->
     <div id="mode-overlay" class="overlay" style="display: none;">
         <div class="menu-card">
             <div class="spectator-toggle">
                 <input type="checkbox" id="spectator-checkbox">
                 <label for="spectator-checkbox">👁️ Спостерігач</label>
             </div>
-            <h1>Режими гри</h1>
-            
-            <div class="mode-card" onclick="startSelectedGame('ffa')">
-                <div class="mode-title">⚔️ FFA (Free For All)</div>
-                <div class="mode-desc">Кожен сам за себе. Збирай аірдропи та знищуй суперників!</div>
+            <h1>Режим гри</h1>
+            <div class="mode-card" onclick="startSelectedGame()">
+                <div class="mode-title">⚔️ Полігон (FFA)</div>
+                <div class="mode-desc">Єдина спільна карта з укриттями для всіх гравців!</div>
             </div>
-
-            <div class="mode-card disabled">
-                <div class="mode-title">🔒 Королівська Битва</div>
-                <div class="mode-desc">Coming Soon (В розробці)</div>
-            </div>
-
-            <button class="btn" style="background: #555;" onclick="backToProfile()">◄ Назад</button>
+            <button class="btn" style="background: #424242;" onclick="backToProfile()">◄ Назад</button>
         </div>
     </div>
 
-    <!-- Графічний інтерфейс під час гри -->
-    <div id="ui">
-        Онлайн: <span id="online-count">1</span> | Здоров'я: <span id="hp-count">100</span>%
-    </div>
-
+    <div id="ui">Онлайн: <span id="online-count">1</span> | ХП: <span id="hp-count">100</span>%</div>
     <div id="inventory-ui">
         🛡️ Броня: <span id="armor-val">0</span>%<br>
-        🔫 Зброя: <span id="weapon-val">Кулаки</span><br>
-        💣 Гранати: <span id="grenade-val">0</span>
+        🔫 Зброя: <span id="weapon-val">Кулаки</span> <button onclick="dropCurrentWeapon()" style="background:#d84315; color:#fff; border:none; padding:2px 6px; border-radius:4px; cursor:pointer;">Кинути</button><br>
+        💣 Гранати: <span id="grenade-val">2</span> (клавіша F)
     </div>
 
     <div id="spectator-controls">
-        👁️ Режим спостерігача | Швидкість: 
-        <input type="range" id="spec-speed" min="0.5" max="3.0" step="0.1" value="1.0" oninput="updateSpecSpeed(this.value)">
-        <span id="spec-speed-val">x1.0</span>
+        👁️ Спостерігач | Швидкість: <input type="range" id="spec-speed" min="0.5" max="3.0" step="0.1" value="1.0" oninput="updateSpecSpeed(this.value)"><span id="spec-speed-val">x1.0</span>
     </div>
 
-    <div id="joystick-base">
-        <div id="joystick-stick"></div>
-    </div>
+    <div id="joystick-base"><div id="joystick-stick"></div></div>
 
     <div id="chat-container">
         <div id="chat-messages"></div>
-        <form onsubmit="sendChatMessage(event)">
-            <input type="text" id="chat-input" placeholder="Чат..." autocomplete="off" maxlength="100">
-        </form>
+        <form onsubmit="sendChatMessage(event)"><input type="text" id="chat-input" placeholder="Чат..." autocomplete="off" maxlength="100"></form>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
     <script>
         const socket = io('https://grassbox-yv7s.onrender.com');
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
         resize();
 
-        // Межі світу (2000х2000 пікселів)
-        const WORLD_SIZE = 2000;
+        const WORLD_SIZE = 3000;
 
-        // Генератор 50+ видів зброї
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playGunSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(260, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
         const WEAPONS_DATABASE = [
             "AK-47", "M4A1", "AWP", "Desert Eagle", "MP5", "Shotgun", "P90", "FN FAL", "AUG", "FAMAS",
             "Glock-18", "USP-S", "CZ75", "Beretta", "Revolver", "Vector", "Uzi", "PP-Bizon", "UMP-45", "Mac-10",
             "M249", "Negev", "SCAR-20", "G3SG1", "SSG 08", "Kar98k", "Barrett .50", "Mosina", "SVD", "VSS Vintorez",
-            "Spas-12", "AA-12", "Benelli M4", "Sawed-Off", "MAG-7", "Laser Rifle", "Plasma Gun", "Gauss Cannon", "Railgun", "FlameThrower",
-            "Crossbow", "RPG-7", "Grenade Launcher", "Minigun", "Raygun", "Proton Gun", "Blaster", "Pulse Rifle", "BFG 9000", "Cyber Rifle"
+            "Spas-12", "AA-12", "Benelli M4", "Sawed-Off", "MAG-7", "Laser Rifle", "Plasma Gun", "Gauss Cannon", "Railgun", "FlameThrower"
         ];
 
-        let gameStarted = false;
-        let isSpectator = false;
-        let isDead = false;
-        let deathTimer = 0;
-        let controlType = 'pc';
-
-        let player = {
-            x: 0,
-            y: 0,
-            size: 34,
-            speed: 4.5,
-            baseSpeed: 4.5,
-            color: '#e53935',
-            name: 'Гравець',
-            hp: 100,
-            armor: 0,
-            weapon: 'Кулаки',
-            grenades: 0
-        };
+        let gameStarted = false, isSpectator = false, isDead = false, controlType = 'pc';
+        let player = { x: 0, y: 0, size: 30, speed: 4.2, baseSpeed: 4.2, color: '#388e3c', name: 'Гравець', hp: 100, armor: 0, weapon: 'Кулаки', grenades: 2 };
 
         const enemies = {};
         const airdrops = [];
+        const droppedWeapons = [];
         const bullets = [];
+        const grenades = [];
         const smokeClouds = [];
-        const grassBlades = [];
 
-        // Спавн трави по всьому світу
-        for (let i = 0; i < 800; i++) {
-            grassBlades.push({
-                x: (Math.random() - 0.5) * WORLD_SIZE,
-                y: (Math.random() - 0.5) * WORLD_SIZE,
-                height: 18 + Math.random() * 20,
-                color: Math.random() > 0.4 ? '#2e6b20' : '#3b822c'
-            });
-        }
+        // ФІКСОВАНА СІТКА КАРТИ (однакова для всіх гравців!)
+        const walls = [
+            { x: -300, y: -300, w: 200, h: 20 },
+            { x: -300, y: -300, w: 20, h: 200 },
+            { x: 150, y: -250, w: 250, h: 20 },
+            { x: 250, y: -250, w: 20, h: 220 },
+            { x: -200, y: 200, w: 20, h: 250 },
+            { x: -200, y: 430, w: 280, h: 20 },
+            { x: 200, y: 150, w: 220, h: 20 },
+            { x: 300, y: -50, w: 20, h: 200 },
+            { x: -500, y: -100, w: 20, h: 300 },
+            { x: -600, y: -100, w: 120, h: 20 },
+            { x: 400, y: 300, w: 200, h: 20 },
+            { x: -400, y: -500, w: 300, h: 20 },
+            { x: 200, y: -500, w: 20, h: 180 },
+            { x: -100, y: -600, w: 20, h: 150 }
+        ];
 
-        // Спавн Аірдропів
-        for (let i = 0; i < 25; i++) {
-            airdrops.push({
-                x: (Math.random() - 0.5) * (WORLD_SIZE - 200),
-                y: (Math.random() - 0.5) * (WORLD_SIZE - 200),
-                weapon: WEAPONS_DATABASE[Math.floor(Math.random() * WEAPONS_DATABASE.length)],
-                armor: Math.floor(Math.random() * 50) + 30,
-                grenades: Math.floor(Math.random() * 3) + 1
-            });
+        const tireBarriers = [
+            { x: -100, y: -100, radius: 20 },
+            { x: 50, y: 100, radius: 22 },
+            { x: -250, y: 300, radius: 18 },
+            { x: 350, y: -150, radius: 25 },
+            { x: 0, y: -400, radius: 20 },
+            { x: 450, y: 200, radius: 18 }
+        ];
+
+        const leaves = [];
+        const pumpkins = [];
+        const grassPatches = [];
+
+        function generateStaticEnvironment() {
+            for (let i = 0; i < 400; i++) {
+                grassPatches.push({ x: (Math.random() - 0.5) * WORLD_SIZE, y: (Math.random() - 0.5) * WORLD_SIZE, color: Math.random() > 0.5 ? '#24451a' : '#315722' });
+            }
+            for (let i = 0; i < 80; i++) {
+                leaves.push({ x: (Math.random() - 0.5) * WORLD_SIZE, y: (Math.random() - 0.5) * WORLD_SIZE, size: 3 + Math.random() * 4, color: Math.random() > 0.5 ? '#d84315' : '#f57c00' });
+            }
+            for (let i = 0; i < 15; i++) {
+                pumpkins.push({ x: (Math.random() - 0.5) * 1500, y: (Math.random() - 0.5) * 1500, r: 10 + Math.random() * 4 });
+            }
         }
+        generateStaticEnvironment();
+
+        function spawnAirdrop() {
+            if (airdrops.length < 4) {
+                airdrops.push({
+                    x: (Math.random() - 0.5) * (WORLD_SIZE - 400),
+                    y: (Math.random() - 0.5) * (WORLD_SIZE - 400),
+                    weapon: WEAPONS_DATABASE[Math.floor(Math.random() * WEAPONS_DATABASE.length)],
+                    armor: 50, grenades: 2
+                });
+            }
+        }
+        setInterval(spawnAirdrop, 12000);
 
         const keys = {};
-        window.addEventListener('keydown', (e) => { 
+        window.addEventListener('keydown', (e) => {
             if (document.activeElement.id === 'chat-input') return;
-            keys[e.key.toLowerCase()] = true; 
+            keys[e.key.toLowerCase()] = true;
+            if (e.key.toLowerCase() === 'f') throwGrenade();
         });
         window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
-
-        // Стрільба на ПК
-        window.addEventListener('mousedown', (e) => {
-            if (!gameStarted || isSpectator || isDead || e.target.tagName === 'INPUT') return;
-            shoot();
-        });
-
-        function shoot() {
-            bullets.push({
-                x: player.x,
-                y: player.y,
-                dx: (mouseWorldX - player.x) * 0.1,
-                dy: (mouseWorldY - player.y) * 0.1,
-                life: 40
-            });
-        }
 
         let mouseWorldX = 0, mouseWorldY = 0;
         window.addEventListener('mousemove', (e) => {
@@ -422,11 +249,36 @@
             mouseWorldY = e.clientY - canvas.height / 2 + player.y;
         });
 
+        window.addEventListener('mousedown', (e) => {
+            if (!gameStarted || isSpectator || isDead || e.target.tagName === 'INPUT') return;
+            shootWeapon();
+        });
+
+        function shootWeapon() {
+            playGunSound(player.weapon);
+            bullets.push({ x: player.x, y: player.y, dx: (mouseWorldX - player.x) * 0.12, dy: (mouseWorldY - player.y) * 0.12, life: 45 });
+        }
+
+        function throwGrenade() {
+            if (player.grenades > 0 && !isSpectator && !isDead) {
+                player.grenades--;
+                document.getElementById('grenade-val').innerText = player.grenades;
+                grenades.push({ x: player.x, y: player.y, dx: (mouseWorldX - player.x) * 0.05, dy: (mouseWorldY - player.y) * 0.05, timer: 60 });
+            }
+        }
+
+        function dropCurrentWeapon() {
+            if (player.weapon !== 'Кулаки') {
+                droppedWeapons.push({ x: player.x, y: player.y, weapon: player.weapon });
+                player.weapon = 'Кулаки';
+                document.getElementById('weapon-val').innerText = 'Кулаки';
+            }
+        }
+
         function openModeMenu() {
             player.name = document.getElementById('nickname-input').value.trim() || 'Гравець';
             player.color = document.getElementById('color-input').value;
             controlType = document.getElementById('control-input').value;
-
             document.getElementById('profile-overlay').style.display = 'none';
             document.getElementById('mode-overlay').style.display = 'flex';
         }
@@ -436,147 +288,116 @@
             document.getElementById('profile-overlay').style.display = 'flex';
         }
 
-        function startSelectedGame(mode) {
+        function startSelectedGame() {
             isSpectator = document.getElementById('spectator-checkbox').checked;
-            
-            // Автоматичне скидання швидкості до нормальної, якщо граємо
-            if (!isSpectator) {
-                player.speed = player.baseSpeed;
-                document.getElementById('spectator-controls').style.display = 'none';
-            } else {
-                document.getElementById('spectator-controls').style.display = 'block';
-            }
+            player.speed = isSpectator ? player.baseSpeed * parseFloat(document.getElementById('spec-speed').value) : player.baseSpeed;
+            document.getElementById('spectator-controls').style.display = isSpectator ? 'block' : 'none';
+            if (controlType === 'mobile' && !isSpectator) document.getElementById('joystick-base').style.display = 'block';
 
-            if (controlType === 'mobile' && !isSpectator) {
-                document.getElementById('joystick-base').style.display = 'block';
-            }
-
-            document.getElementById('mode-overlay').style.opacity = '0';
-            setTimeout(() => { document.getElementById('mode-overlay').style.display = 'none'; }, 400);
+            document.getElementById('mode-overlay').style.display = 'none';
             document.getElementById('chat-container').style.opacity = '1';
-
-            gameStarted = true;
-            isDead = false;
-            player.hp = 100;
-            player.x = 0;
-            player.y = 0;
-
+            gameStarted = true; isDead = false; player.hp = 100; player.x = 0; player.y = 0;
             socket.emit('player-join', { name: player.name, color: player.color, spectator: isSpectator });
         }
 
         function updateSpecSpeed(val) {
             document.getElementById('spec-speed-val').innerText = 'x' + val;
-            if (isSpectator) {
-                player.speed = player.baseSpeed * parseFloat(val);
-            }
+            if (isSpectator) player.speed = player.baseSpeed * parseFloat(val);
         }
 
-        // Обробка підключень Socket.IO
         socket.on('update-online', (count) => { document.getElementById('online-count').innerText = count; });
-
         socket.on('enemy-move', (data) => {
-            if (data.spectator) return; // Спостерігачі невидимі!
+            if (data.spectator) return;
             if (!enemies[data.id]) {
-                enemies[data.id] = { x: data.x, y: data.y, targetX: data.x, targetY: data.y, color: data.color, name: data.name };
+                enemies[data.id] = { x: data.x, y: data.y, targetX: data.x, targetY: data.y, color: data.color || '#e65100', name: data.name || 'Гравець' };
             } else {
                 enemies[data.id].targetX = data.x;
                 enemies[data.id].targetY = data.y;
+                if (data.color) enemies[data.id].color = data.color;
+                if (data.name) enemies[data.id].name = data.name;
             }
         });
 
         socket.on('player-disconnected', (id) => { delete enemies[id]; });
-
         socket.on('chat-message', (data) => {
             const msgs = document.getElementById('chat-messages');
-            const el = document.createElement('div');
-            el.innerHTML = `<b>${escapeHtml(data.name)}:</b> ${escapeHtml(data.text)}`;
-            msgs.appendChild(el);
+            msgs.innerHTML += `<div><b>${data.name}:</b> ${data.text}</div>`;
             msgs.scrollTop = msgs.scrollHeight;
         });
 
         function sendChatMessage(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
-            if (input.value.trim()) {
-                socket.emit('chat-message', { text: input.value.trim(), name: player.name });
-                input.value = '';
-            }
-        }
-
-        function escapeHtml(text) { return text.replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-
-        function triggerDeath() {
-            isDead = true;
-            deathTimer = Date.now();
-            
-            // Створення білого туману навколо гравця
-            for (let i = 0; i < 30; i++) {
-                smokeClouds.push({
-                    x: player.x + (Math.random() - 0.5) * 60,
-                    y: player.y + (Math.random() - 0.5) * 60,
-                    radius: 20 + Math.random() * 30,
-                    alpha: 0.9
-                });
-            }
-
-            // Через 3 секунди викидаємо в меню
-            setTimeout(() => {
-                gameStarted = false;
-                document.getElementById('profile-overlay').style.display = 'flex';
-                document.getElementById('profile-overlay').style.opacity = '1';
-                document.getElementById('chat-container').style.opacity = '0';
-                document.getElementById('joystick-base').style.display = 'none';
-            }, 3000);
+            if (input.value.trim()) { socket.emit('chat-message', { text: input.value.trim(), name: player.name }); input.value = ''; }
         }
 
         function update() {
             if (!gameStarted || isDead) return;
 
-            let moved = false;
             let moveX = 0, moveY = 0;
+            if (keys['w'] || keys['arrowup']) moveY -= 1;
+            if (keys['s'] || keys['arrowdown']) moveY += 1;
+            if (keys['a'] || keys['arrowleft']) moveX -= 1;
+            if (keys['d'] || keys['arrowright']) moveX += 1;
 
-            if (keys['w'] || keys['arrowup']) { moveY -= 1; moved = true; }
-            if (keys['s'] || keys['arrowdown']) { moveY += 1; moved = true; }
-            if (keys['a'] || keys['arrowleft']) { moveX -= 1; moved = true; }
-            if (keys['d'] || keys['arrowright']) { moveX += 1; moved = true; }
+            let nextX = player.x + moveX * player.speed;
+            let nextY = player.y + moveY * player.speed;
 
-            player.x += moveX * player.speed;
-            player.y += moveY * player.speed;
+            // Перевірка зіткнень з фіксованими стінами для всіх однаково
+            let collide = false;
+            walls.forEach(w => {
+                if (nextX > w.x - 15 && nextX < w.x + w.w + 15 && nextY > w.y - 15 && nextY < w.y + w.h + 15) {
+                    collide = true;
+                }
+            });
 
-            // Обмеження межами світу (Край світу)
-            const maxBound = WORLD_SIZE / 2;
-            player.x = Math.max(-maxBound, Math.min(maxBound, player.x));
-            player.y = Math.max(-maxBound, Math.min(maxBound, player.y));
+            if (!collide) {
+                player.x = nextX;
+                player.y = nextY;
+            }
 
-            if (moved && !isSpectator) {
+            const bound = WORLD_SIZE / 2;
+            player.x = Math.max(-bound, Math.min(bound, player.x));
+            player.y = Math.max(-bound, Math.min(bound, player.y));
+
+            if ((moveX !== 0 || moveY !== 0) && !isSpectator) {
                 socket.emit('player-move', { x: player.x, y: player.y, color: player.color, name: player.name });
             }
 
-            // Підбір аірдропів
-            if (!isSpectator) {
-                airdrops.forEach((air, index) => {
-                    let dist = Math.hypot(player.x - air.x, player.y - air.y);
-                    if (dist < 40) {
-                        player.weapon = air.weapon;
-                        player.armor = Math.min(100, player.armor + air.armor);
-                        player.grenades += air.grenades;
-                        document.getElementById('weapon-val').innerText = player.weapon;
-                        document.getElementById('armor-val').innerText = player.armor;
-                        document.getElementById('grenade-val').innerText = player.grenades;
-                        airdrops.splice(index, 1);
-                    }
-                });
-            }
+            airdrops.forEach((air, index) => {
+                if (Math.hypot(player.x - air.x, player.y - air.y) < 35) {
+                    player.weapon = air.weapon; player.armor = 100; player.grenades += air.grenades;
+                    document.getElementById('weapon-val').innerText = player.weapon;
+                    document.getElementById('armor-val').innerText = player.armor;
+                    document.getElementById('grenade-val').innerText = player.grenades;
+                    airdrops.splice(index, 1);
+                }
+            });
 
-            // Оновлення куль
+            droppedWeapons.forEach((dw, index) => {
+                if (Math.hypot(player.x - dw.x, player.y - dw.y) < 30) {
+                    droppedWeapons.push({ x: player.x, y: player.y, weapon: player.weapon });
+                    player.weapon = dw.weapon;
+                    document.getElementById('weapon-val').innerText = player.weapon;
+                    droppedWeapons.splice(index, 1);
+                }
+            });
+
             bullets.forEach((b, i) => {
-                b.x += b.dx;
-                b.y += b.dy;
-                b.life--;
+                b.x += b.dx; b.y += b.dy; b.life--;
                 if (b.life <= 0) bullets.splice(i, 1);
             });
 
-            // Згладжування ворогів
+            grenades.forEach((g, i) => {
+                g.x += g.dx; g.y += g.dy; g.timer--;
+                if (g.timer <= 0) {
+                    for(let k=0; k<12; k++) {
+                        smokeClouds.push({ x: g.x + (Math.random()-0.5)*30, y: g.y + (Math.random()-0.5)*30, radius: 18, alpha: 0.9 });
+                    }
+                    grenades.splice(i, 1);
+                }
+            });
+
             for (let id in enemies) {
                 let en = enemies[id];
                 en.x += (en.targetX - en.x) * 0.2;
@@ -585,100 +406,82 @@
         }
 
         function draw() {
-            ctx.fillStyle = '#1c3d14';
+            ctx.fillStyle = '#2a4f1e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.save();
             ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
 
-            // Трава
-            const time = Date.now() / 350;
-            grassBlades.forEach((blade, index) => {
-                ctx.strokeStyle = blade.color;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(blade.x, blade.y);
-                let wind = Math.sin(time + index * 0.5) * 5;
-                ctx.quadraticCurveTo(blade.x + wind / 2, blade.y - blade.height / 2, blade.x + wind, blade.y - blade.height);
-                ctx.stroke();
+            grassPatches.forEach(g => { ctx.fillStyle = g.color; ctx.fillRect(g.x, g.y, 8, 8); });
+            leaves.forEach(l => { ctx.fillStyle = l.color; ctx.beginPath(); ctx.arc(l.x, l.y, l.size, 0, Math.PI * 2); ctx.fill(); });
+
+            walls.forEach(w => {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(w.x + 4, w.y + 4, w.w, w.h);
+                ctx.fillStyle = '#4e342e';
+                ctx.fillRect(w.x, w.y, w.w, w.h);
+                ctx.strokeStyle = '#271c19'; ctx.lineWidth = 2;
+                ctx.strokeRect(w.x, w.y, w.w, w.h);
             });
 
-            // Межі світу (Червона сяюча лінія)
-            ctx.strokeStyle = '#ff1744';
-            ctx.lineWidth = 8;
-            ctx.shadowColor = '#ff1744';
-            ctx.shadowBlur = 15;
-            ctx.strokeRect(-WORLD_SIZE / 2, -WORLD_SIZE / 2, WORLD_SIZE, WORLD_SIZE);
-            ctx.shadowBlur = 0;
+            tireBarriers.forEach(tb => {
+                ctx.fillStyle = '#212121';
+                ctx.beginPath(); ctx.arc(tb.x, tb.y, tb.radius, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#424242'; ctx.lineWidth = 3; ctx.stroke();
+            });
 
-            // Малюємо Аірдропи
+            pumpkins.forEach(p => {
+                ctx.fillStyle = '#ef6c00';
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+            });
+
             airdrops.forEach(air => {
-                ctx.fillStyle = '#ffb300';
-                ctx.shadowColor = '#ffb300';
-                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#ffc107';
                 ctx.fillRect(air.x - 15, air.y - 15, 30, 30);
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('DROP', air.x, air.y + 4);
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.strokeRect(air.x - 15, air.y - 15, 30, 30);
+                ctx.fillStyle = '#000'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText('DROP', air.x, air.y + 3);
             });
 
-            // Кулі
-            ctx.fillStyle = '#ffff00';
-            bullets.forEach(b => {
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
-                ctx.fill();
+            droppedWeapons.forEach(dw => {
+                ctx.fillStyle = '#78909c';
+                ctx.fillRect(dw.x - 8, dw.y - 4, 16, 8);
             });
 
-            // Інші гравці (тільки якщо ми не в інвізі або вони грають)
+            ctx.fillStyle = '#333';
+            grenades.forEach(g => { ctx.beginPath(); ctx.arc(g.x, g.y, 5, 0, Math.PI * 2); ctx.fill(); });
+
+            ctx.fillStyle = '#ffeb3b';
+            bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x, b.y, 3, 0, Math.PI * 2); ctx.fill(); });
+
             for (let id in enemies) {
                 let en = enemies[id];
                 ctx.fillStyle = en.color;
-                ctx.fillRect(en.x - 17, en.y - 17, 34, 34);
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 12px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(en.name, en.x, en.y - 24);
+                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(en.x - 15, en.y - 15, 30, 30);
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(en.name, en.x, en.y - 22);
             }
 
-            // Наш гравець (якщо не спостерігач)
-            if (!isSpectator) {
-                if (isDead) {
-                    // Анімація біління під час смерті
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(player.x - 17, player.y - 17, 34, 34);
-                } else {
-                    ctx.fillStyle = player.color;
-                    ctx.fillRect(player.x - 17, player.y - 17, 34, 34);
-                    ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 12px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(player.name, player.x, player.y - 24);
-                }
+            if (!isSpectator && !isDead) {
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x - 15, player.y - 15, 30, 30);
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.strokeRect(player.x - 15, player.y - 15, 30, 30);
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(player.name, player.x, player.y - 22);
             }
 
-            // Білий туман смерті (розвіюється за 3 секунди)
-            smokeClouds.forEach((cloud, index) => {
-                ctx.fillStyle = `rgba(255, 255, 255, ${cloud.alpha})`;
-                ctx.beginPath();
-                ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
-                ctx.fill();
-                cloud.alpha -= 0.005; // Поступове розвіювання
-                cloud.radius += 0.2;
-                if (cloud.alpha <= 0) smokeClouds.splice(index, 1);
+            smokeClouds.forEach((sc, i) => {
+                ctx.fillStyle = `rgba(220, 220, 220, ${sc.alpha})`;
+                ctx.beginPath(); ctx.arc(sc.x, sc.y, sc.radius, 0, Math.PI * 2); ctx.fill();
+                sc.alpha -= 0.01; sc.radius += 0.2;
+                if (sc.alpha <= 0) smokeClouds.splice(i, 1);
             });
 
             ctx.restore();
         }
 
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
+        function loop() { update(); draw(); requestAnimationFrame(loop); }
         loop();
     </script>
 </body>

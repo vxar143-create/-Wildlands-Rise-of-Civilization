@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GrassBox - Multiplayer</title>
+    <title>GrassBox - Ultimate Edition</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,8 +16,8 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #2e5a1e;
-            font-family: Arial, sans-serif;
+            background-color: #1a3811;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         canvas {
             display: block;
@@ -27,78 +27,206 @@
             width: 100%;
             height: 100%;
         }
-        #ui {
+
+        /* Головне меню з розмитим фоном */
+        #menu-overlay {
             position: absolute;
-            top: 15px;
-            left: 15px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 56, 17, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+
+        .menu-card {
+            background: rgba(15, 33, 10, 0.85);
+            border: 2px solid rgba(76, 175, 80, 0.4);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            width: 340px;
+        }
+
+        .menu-card h1 {
+            color: #4CAF50;
+            font-size: 32px;
+            margin-bottom: 25px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            color: #b0bec5;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #33691e;
+            background: rgba(0, 0, 0, 0.5);
             color: #fff;
             font-size: 16px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: #4CAF50;
+        }
+
+        #play-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76, 175, 80,.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        #play-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Ігровий інтерфейс (UI) */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
             pointer-events: none;
             z-index: 10;
+            background: rgba(0,0,0,0.3);
+            padding: 8px 14px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
         }
+
         #chat-container {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            width: 300px;
-            max-height: 200px;
+            width: 320px;
+            max-height: 220px;
             display: flex;
             flex-direction: column;
             z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
+
         #chat-messages {
             flex-grow: 1;
             overflow-y: auto;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px;
-            border-radius: 8px 8px 0 0;
+            background: rgba(10, 20, 8, 0.6);
+            backdrop-filter: blur(6px);
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
             color: #fff;
-            font-size: 14px;
-            max-height: 150px;
+            font-size: 13px;
+            max-height: 160px;
             word-break: break-all;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-bottom: none;
         }
+
         #chat-form {
             display: flex;
         }
+
         #chat-input {
+            flex-grow: ket;
             flex-grow: 1;
-            padding: 8px;
+            padding: 10px;
             border: none;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 0 0 0 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border-radius: 0 0 0 10px;
             outline: none;
-            font-size: 14px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
+
         #chat-send {
-            padding: 8px 12px;
+            padding: 10px 16px;
             border: none;
             background: #4CAF50;
             color: white;
-            border-radius: 0 0 8px 0;
+            border-radius: 0 0 10px 0;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
         }
+        #chat-send:hover { background: #43A047; }
     </style>
-    <!-- Підключаємо Socket.IO клієнтську бібліотеку -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
+
+    <!-- Головне меню з розмиттям -->
+    <div id="menu-overlay">
+        <div class="menu-card">
+            <h1>GrassBox</h1>
+            <div class="input-group">
+                <label>Ваш нікнейм:</label>
+                <input type="text" id="nickname-input" placeholder="Введіть нік..." maxlength="12" value="Гравець">
+            </div>
+            <div class="input-group">
+                <label>Колір кубика:</label>
+                <select id="color-input">
+                    <option value="#e53935">Червоний</option>
+                    <option value="#1e88e5">Синій</option>
+                    <option value="#43a047">Зелений</option>
+                    <option value="#fb8c00">Помаранчевий</option>
+                    <option value="#8e24aa">Фіолетовий</option>
+                    <option value="#fdd835">Жовтий</option>
+                </select>
+            </div>
+            <button id="play-btn" onclick="startGame()">ГРАТИ</button>
+        </div>
+    </div>
 
     <div id="ui">Онлайн: <span id="online-count">1</span></div>
 
     <canvas id="gameCanvas"></canvas>
 
-    <div id="chat-container">
+    <div id="chat-container" id="chat-box">
         <div id="chat-messages"></div>
         <form id="chat-form" onsubmit="sendChatMessage(event)">
-            <input type="text" id="chat-input" placeholder="Написати в чат..." autocomplete="off" maxlength="100">
-            <button type="submit" id="chat-send">💬</button>
+            <input type="text" id="chat-input" placeholder="Написати повідомлення..." autocomplete="off" maxlength="100">
+            <button type="submit" id="chat-send">➤</button>
         </form>
     </div>
 
     <script>
-        // Підключаємося до нашого 24/7 хмарного сервера на Render
         const socket = io('https://grassbox-yv7s.onrender.com');
 
         const canvas = document.getElementById('gameCanvas');
@@ -111,45 +239,65 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Позиція нашого гравця
+        let gameStarted = false;
         let player = {
             x: canvas.width / 2,
             y: canvas.height / 2,
-            size: 30,
-            speed: 4,
-            color: '#e53935'
+            size: 34,
+            speed: 4.5,
+            color: '#e53935',
+            name: 'Гравець'
         };
 
-        // Словник інших гравців онлайн
         const enemies = {};
-
-        // Генерація декоративної трави на фоні (органічна щільність)
         const grassBlades = [];
-        for (let i = 0; i < 300; i++) {
+
+        // Генерація густої, красивої трави з різними відтінками для «топової» графіки
+        for (let i = 0; i < 500; i++) {
             grassBlades.push({
-                x: Math.random() * 3000 - 1000,
-                y: Math.random() * 3000 - 1000,
-                height: 15 + Math.random() * 20,
-                color: Math.random() > 0.5 ? '#3b7a2e' : '#4d9a3d'
+                x: Math.random() * 4000 - 1500,
+                y: Math.random() * 4000 - 1500,
+                height: 18 + Math.random() * 22,
+                color: Math.random() > 0.4 ? '#2e6b20' : (Math.random() > 0.5 ? '#3b822c' : '#235218')
             });
         }
 
-        // Керування клавіатурою (WASD / Стрілки)
         const keys = {};
-        window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
-        window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+        window.addEventListener('keydown', (e) => { 
+            if (document.activeElement.id === 'chat-input') return;
+            keys[e.key.toLowerCase()] = true; 
+        });
+        window.addEventListener('keyup', (e) => { 
+            keys[e.key.toLowerCase()] = false; 
+        });
 
-        // Обробка подій сервера
+        function startGame() {
+            const nick = document.getElementById('nickname-input').value.trim();
+            if (nick) player.name = nick;
+            player.color = document.getElementById('color-input').value;
+
+            // Плавне приховування меню та поява чату
+            const menu = document.getElementById('menu-overlay');
+            menu.style.opacity = '0';
+            setTimeout(() => { menu.style.display = 'none'; }, 500);
+            document.getElementById('chat-container').style.opacity = '1';
+
+            gameStarted = true;
+            socket.emit('player-join', { name: player.name, color: player.color, x: player.x, y: player.y });
+        }
+
         socket.on('update-online', (count) => {
             document.getElementById('online-count').innerText = count;
         });
 
         socket.on('enemy-move', (data) => {
             if (!enemies[data.id]) {
-                enemies[data.id] = { x: data.x, y: data.y, color: '#3f51b5' };
+                enemies[data.id] = { x: data.x, y: data.y, targetX: data.x, targetY: data.y, color: data.color || '#3f51b5', name: data.name || 'Друг' };
             } else {
-                enemies[data.id].x = data.x;
-                enemies[data.id].y = data.y;
+                enemies[data.id].targetX = data.x;
+                enemies[data.id].targetY = data.y;
+                if (data.color) enemies[data.id].color = data.color;
+                if (data.name) enemies[data.id].name = data.name;
             }
         });
 
@@ -160,7 +308,8 @@
         socket.on('chat-message', (data) => {
             const chatMessages = document.getElementById('chat-messages');
             const msgEl = document.createElement('div');
-            msgEl.innerHTML = `<b>${data.id.substring(0, 4)}:</b> ${escapeHtml(data.text)}`;
+            msgEl.style.marginBottom = '4px';
+            msgEl.innerHTML = `<span style="color: #81c784; font-weight: bold;">${escapeHtml(data.name)}:</span> ${escapeHtml(data.text)}`;
             chatMessages.appendChild(msgEl);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         });
@@ -170,7 +319,7 @@
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (text) {
-                socket.emit('chat-message', text);
+                socket.emit('chat-message', { text: text, name: player.name });
                 input.value = '';
             }
         }
@@ -179,8 +328,9 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Головний ігровий цикл
         function update() {
+            if (!gameStarted) return;
+
             let moved = false;
             if (keys['w'] || keys['arrowup']) { player.y -= player.speed; moved = true; }
             if (keys['s'] || keys['arrowdown']) { player.y += player.speed; moved = true; }
@@ -188,46 +338,88 @@
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; moved = true; }
 
             if (moved) {
-                socket.emit('player-move', { x: player.x, y: player.y });
+                socket.emit('player-move', { x: player.x, y: player.y, color: player.color, name: player.name });
+            }
+
+            // Плавна інтерполяція (згладжування) руху інших гравців для топової візуалізації
+            for (let id in enemies) {
+                let en = enemies[id];
+                en.x += (en.targetX - en.x) * 0.2;
+                en.y += (en.targetY - en.y) * 0.2;
             }
         }
 
         function draw() {
-            ctx.fillStyle = '#2e5a1e';
+            // Розкішний насичений фон галявини
+            ctx.fillStyle = '#1c3d14';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Зміщення камери за гравцем
             ctx.save();
             ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
 
-            // Малюємо траву з вітровою анімацією
-            const time = Date.now() / 300;
+            // Анімація вітру для трави
+            const time = Date.now() / 350;
             grassBlades.forEach((blade, index) => {
                 ctx.strokeStyle = blade.color;
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2.2;
                 ctx.beginPath();
                 ctx.moveTo(blade.x, blade.y);
-                let wind = Math.sin(time + index) * 5;
+                let wind = Math.sin(time + index * 0.5) * 6;
                 ctx.quadraticCurveTo(blade.x + wind / 2, blade.y - blade.height / 2, blade.x + wind, blade.y - blade.height);
                 ctx.stroke();
             });
 
-            // Малюємо інших гравців
+            // Малюємо тіні та інших гравців
             for (let id in enemies) {
                 let en = enemies[id];
+                
+                // Тінь під кубиком
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                ctx.beginPath();
+                ctx.ellipse(en.x, en.y + 16, 16, 8, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Сам кубик ворога
                 ctx.fillStyle = en.color;
-                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.fillText(id.substring(0, 4), en.x - 12, en.y - 20);
+                ctx.shadowColor = 'rgba(0,0,0,0.4)';
+                ctx.shadowBlur = 10;
+                ctx.fillRect(en.x - 17, en.y - 17, 34, 34);
+                ctx.shadowBlur = 0; // скидаємо тінь
+
+                // Обведення кубика для стилю
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(en.x - 17, en.y - 17, 34, 34);
+
+                // Нікнейм над кубиком
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(en.name, en.x, en.y - 26);
             }
 
-            // Малюємо нашого гравця (кубик)
+            // Тінь нашого гравця
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.beginPath();
+            ctx.ellipse(player.x, player.y + 16, 16, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Наш кубик із м'яким світінням/тінню
             ctx.fillStyle = player.color;
-            ctx.fillRect(player.x - 15, player.y - 15, 30, 30);
-            ctx.fillStyle = '#fff';
-            ctx.font = '12px Arial';
-            ctx.fillText('Я', player.x - 6, player.y - 20);
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 12;
+            ctx.fillRect(player.x - 17, player.y - 17, 34, 34);
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(player.x - 17, player.y - 17, 34, 34);
+
+            // Наш нікнейм
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 13px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(player.name + ' (Ви)', player.x, player.y - 26);
 
             ctx.restore();
         }

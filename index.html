@@ -112,7 +112,7 @@
             <h1>Режим гри</h1>
             <div class="mode-card" onclick="startSelectedGame()">
                 <div class="mode-title">⚔️ Полігон (FFA)</div>
-                <div class="mode-desc">Єдина спільна карта з укриттями для всіх гравців!</div>
+                <div class="mode-desc">Спільна карта з перешкодами, стінами та боями!</div>
             </div>
             <button class="btn" style="background: #424242;" onclick="backToProfile()">◄ Назад</button>
         </div>
@@ -179,7 +179,6 @@
         const grenades = [];
         const smokeClouds = [];
 
-        // ФІКСОВАНА СІТКА КАРТИ (однакова для всіх гравців!)
         const walls = [
             { x: -300, y: -300, w: 200, h: 20 },
             { x: -300, y: -300, w: 20, h: 200 },
@@ -256,7 +255,13 @@
 
         function shootWeapon() {
             playGunSound(player.weapon);
-            bullets.push({ x: player.x, y: player.y, dx: (mouseWorldX - player.x) * 0.12, dy: (mouseWorldY - player.y) * 0.12, life: 45 });
+            bullets.push({ 
+                x: player.x, y: player.y, 
+                dx: (mouseWorldX - player.x) * 0.12, 
+                dy: (mouseWorldY - player.y) * 0.12, 
+                life: 45, 
+                shooter: socket.id 
+            });
         }
 
         function throwGrenade() {
@@ -297,6 +302,7 @@
             document.getElementById('mode-overlay').style.display = 'none';
             document.getElementById('chat-container').style.opacity = '1';
             gameStarted = true; isDead = false; player.hp = 100; player.x = 0; player.y = 0;
+            document.getElementById('hp-count').innerText = player.hp;
             socket.emit('player-join', { name: player.name, color: player.color, spectator: isSpectator });
         }
 
@@ -331,6 +337,38 @@
             if (input.value.trim()) { socket.emit('chat-message', { text: input.value.trim(), name: player.name }); input.value = ''; }
         }
 
+        // Перевірка, чи є перешкода (стіна) між двома точками (для туману війни)
+        function checkLineOfSight(x1, y1, x2, y2) {
+            for (let w of walls) {
+                // Простий перетин ліній з прямокутниками стін
+                let cx = Math.max(w.x, Math.min(x1, w.x + w.w));
+                let cy = Math.max(w.y, Math.min(y1, w.y + w.h));
+                // Якщо шлях перетинає стіну — огляд закритий
+                let steps = 20;
+                for(let i=0; i<=steps; i++) {
+                    let tx = x1 + (x2 - x1) * (i / steps);
+                    let ty = y1 + (y2 - y1) * (i / steps);
+                    if (tx >= w.x && tx <= w.x + w.w && ty >= w.y && ty <= w.y + w.h) {
+                        return false; // Стіна закриває огляд
+                    }
+                }
+            }
+            return true;
+        }
+
+        function triggerDeath() {
+            isDead = true;
+            for(let i=0; i<30; i++) {
+                smokeClouds.push({ x: player.x + (Math.random()-0.5)*60, y: player.y + (Math.random()-0.5)*60, radius: 25 + Math.random()*25, alpha: 0.9 });
+            }
+            setTimeout(() => {
+                gameStarted = false;
+                document.getElementById('profile-overlay').style.display = 'flex';
+                document.getElementById('chat-container').style.opacity = '0';
+                document.getElementById('joystick-base').style.display = 'none';
+            }, 3000);
+        }
+
         function update() {
             if (!gameStarted || isDead) return;
 
@@ -343,7 +381,6 @@
             let nextX = player.x + moveX * player.speed;
             let nextY = player.y + moveY * player.speed;
 
-            // Перевірка зіткнень з фіксованими стінами для всіх однаково
             let collide = false;
             walls.forEach(w => {
                 if (nextX > w.x - 15 && nextX < w.x + w.w + 15 && nextY > w.y - 15 && nextY < w.y + w.h + 15) {
@@ -383,9 +420,30 @@
                 }
             });
 
+            // Оновлення куль та перевірка влучань у стіни й у гравця
             bullets.forEach((b, i) => {
                 b.x += b.dx; b.y += b.dy; b.life--;
-                if (b.life <= 0) bullets.splice(i, 1);
+
+                // Куля зупиняється об стіну
+                let hitWall = false;
+                walls.forEach(w => {
+                    if (b.x >= w.x && b.x <= w.x + w.w && b.y >= w.y && b.y <= w.y + w.h) {
+                        hitWall = true;
+                    }
+                });
+
+                // Перевірка влучання в нашого гравця
+                if (!isSpectator && Math.hypot(player.x - b.x, player.y - b.y) < 18) {
+                    let damage = 20;
+                    if (player.armor > 0) { player.armor -= damage; damage = 0; }
+                    player.hp -= damage;
+                    document.getElementById('hp-count').innerText = Math.max(0, player.hp);
+                    document.getElementById('armor-val').innerText = Math.max(0, player.armor);
+                    hitWall = true;
+                    if (player.hp <= 0 && !isDead) { triggerDeath(); }
+                }
+
+                if (b.life <= 0 || hitWall) bullets.splice(i, 1);
             });
 
             grenades.forEach((g, i) => {
@@ -454,15 +512,20 @@
             ctx.fillStyle = '#ffeb3b';
             bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x, b.y, 3, 0, Math.PI * 2); ctx.fill(); });
 
+            // Вороги відображаються тільки якщо немає стіни між тобою та ними (туман війни)
             for (let id in enemies) {
                 let en = enemies[id];
-                ctx.fillStyle = en.color;
-                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
-                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(en.x - 15, en.y - 15, 30, 30);
-                ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
-                ctx.fillText(en.name, en.x, en.y - 22);
+                let visible = checkLineOfSight(player.x, player.y, en.x, en.y);
+                if (visible || isSpectator) {
+                    ctx.fillStyle = en.color;
+                    ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(en.x - 15, en.y - 15, 30, 30);
+                    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+                    ctx.fillText(en.name, en.x, en.y - 22);
+                }
             }
 
+            // Наш гравець
             if (!isSpectator && !isDead) {
                 ctx.fillStyle = player.color;
                 ctx.fillRect(player.x - 15, player.y - 15, 30, 30);

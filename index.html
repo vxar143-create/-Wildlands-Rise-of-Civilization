@@ -48,7 +48,7 @@
         .menu-card {
             background: rgba(15, 33, 10, 0.85);
             border: 2px solid rgba(76, 175, 80, 0.4);
-            padding: 40px;
+            padding: 35px;
             border-radius: 20px;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
@@ -58,12 +58,12 @@
         .menu-card h1 {
             color: #4CAF50;
             font-size: 32px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: left;
         }
 
@@ -71,17 +71,17 @@
             display: block;
             color: #b0bec5;
             font-size: 13px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .input-group input, .input-group select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
             border: 1px solid #33691e;
             background: rgba(0, 0, 0, 0.5);
             color: #fff;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
             transition: border-color 0.3s;
         }
@@ -102,15 +102,12 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(76, 175, 80,.4);
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
         }
 
         #play-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
-        }
-
-        #play-btn:active {
-            transform: translateY(1px);
         }
 
         /* Ігровий інтерфейс (UI) */
@@ -163,7 +160,6 @@
         }
 
         #chat-input {
-            flex-grow: ket;
             flex-grow: 1;
             padding: 10px;
             border: none;
@@ -186,18 +182,43 @@
             transition: background 0.2s;
         }
         #chat-send:hover { background: #43A047; }
+
+        /* Віртуальний джойстик для телефону */
+        #joystick-base {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: none;
+            z-index: 20;
+            touch-action: none;
+        }
+        #joystick-stick {
+            position: absolute;
+            top: 35px;
+            left: 35px;
+            width: 50px;
+            height: 50px;
+            background: rgba(76, 175, 80, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+        }
     </style>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
 
-    <!-- Головне меню з розмиттям -->
+    <!-- Головне меню -->
     <div id="menu-overlay">
         <div class="menu-card">
             <h1>GrassBox</h1>
             <div class="input-group">
-                <label>Ваш нікнейм:</label>
-                <input type="text" id="nickname-input" placeholder="Введіть нік..." maxlength="12" value="Гравець">
+                <label>Нікнейм:</label>
+                <input type="text" id="nickname-input" placeholder="Ваше ім'я..." maxlength="12" value="Гравець">
             </div>
             <div class="input-group">
                 <label>Колір кубика:</label>
@@ -210,6 +231,13 @@
                     <option value="#fdd835">Жовтий</option>
                 </select>
             </div>
+            <div class="input-group">
+                <label>Тип керування:</label>
+                <select id="control-input">
+                    <option value="pc">ПК (Клавіатура WASD)</option>
+                    <option value="mobile">Телефон (Джойстик)</option>
+                </select>
+            </div>
             <button id="play-btn" onclick="startGame()">ГРАТИ</button>
         </div>
     </div>
@@ -218,7 +246,12 @@
 
     <canvas id="gameCanvas"></canvas>
 
-    <div id="chat-container" id="chat-box">
+    <!-- Віртуальний джойстик (з'явиться тільки якщо вибрано телефон) -->
+    <div id="joystick-base">
+        <div id="joystick-stick"></div>
+    </div>
+
+    <div id="chat-container">
         <div id="chat-messages"></div>
         <form id="chat-form" onsubmit="sendChatMessage(event)">
             <input type="text" id="chat-input" placeholder="Написати повідомлення..." autocomplete="off" maxlength="100">
@@ -240,6 +273,8 @@
         resize();
 
         let gameStarted = false;
+        let controlType = 'pc'; // 'pc' або 'mobile'
+
         let player = {
             x: canvas.width / 2,
             y: canvas.height / 2,
@@ -252,7 +287,6 @@
         const enemies = {};
         const grassBlades = [];
 
-        // Генерація густої, красивої трави з різними відтінками для «топової» графіки
         for (let i = 0; i < 500; i++) {
             grassBlades.push({
                 x: Math.random() * 4000 - 1500,
@@ -262,6 +296,7 @@
             });
         }
 
+        // Клавіатура для ПК
         const keys = {};
         window.addEventListener('keydown', (e) => { 
             if (document.activeElement.id === 'chat-input') return;
@@ -271,12 +306,54 @@
             keys[e.key.toLowerCase()] = false; 
         });
 
-        function startGame() {
-            const nick = document.getElementById('nickname-input').value.trim();
-            if (nick) player.name = nick;
-            player.color = document.getElementById('color-input').value;
+        // Логіка віртуального джойстика для телефону
+        let joystickMove = { x: 0, y: 0 };
+        let isTouchingJoystick = false;
+        const jBase = document.getElementById('joystick-base');
+        const jStick = document.getElementById('joystick-stick');
 
-            // Плавне приховування меню та поява чату
+        jBase.addEventListener('pointerdown', (e) => {
+            isTouchingJoystick = true;
+            updateJoystick(e);
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (isTouchingJoystick) updateJoystick(e);
+        });
+        window.addEventListener('pointerup', () => {
+            if (isTouchingJoystick) {
+                isTouchingJoystick = false;
+                joystickMove = { x: 0, y: 0 };
+                jStick.style.transform = `translate(0px, 0px)`;
+            }
+        });
+
+        function updateJoystick(e) {
+            const rect = jBase.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let dx = e.clientX - centerX;
+            let dy = e.clientY - centerY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const maxRadius = 40;
+
+            if (dist > maxRadius) {
+                dx = (dx / dist) * maxRadius;
+                dy = (dy / dist) * maxRadius;
+            }
+
+            jStick.style.transform = `translate(${dx}px, ${dy}px)`;
+            joystickMove = { x: dx / maxRadius, y: dy / maxRadius };
+        }
+
+        function startGame() {
+            player.name = document.getElementById('nickname-input').value.trim() || 'Гравець';
+            player.color = document.getElementById('color-input').value;
+            controlType = document.getElementById('control-input').value;
+
+            if (controlType === 'mobile') {
+                jBase.style.display = 'block';
+            }
+
             const menu = document.getElementById('menu-overlay');
             menu.style.opacity = '0';
             setTimeout(() => { menu.style.display = 'none'; }, 500);
@@ -305,11 +382,17 @@
             delete enemies[id];
         });
 
+        // Універсальний обробник чату: відображає і свої, і чужі повідомлення
         socket.on('chat-message', (data) => {
             const chatMessages = document.getElementById('chat-messages');
             const msgEl = document.createElement('div');
             msgEl.style.marginBottom = '4px';
-            msgEl.innerHTML = `<span style="color: #81c784; font-weight: bold;">${escapeHtml(data.name)}:</span> ${escapeHtml(data.text)}`;
+            
+            // Якщо це наше повідомлення — підсвічуємо його особливим кольором
+            const isMe = data.id === socket.id;
+            const nameColor = isMe ? '#81c784' : '#64b5f6';
+
+            msgEl.innerHTML = `<span style="color: ${nameColor}; font-weight: bold;">${escapeHtml(data.name)}:</span> ${escapeHtml(data.text)}`;
             chatMessages.appendChild(msgEl);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         });
@@ -319,6 +402,7 @@
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (text) {
+                // Відправляємо на сервер, сервер розішле всім (включно з нами)
                 socket.emit('chat-message', { text: text, name: player.name });
                 input.value = '';
             }
@@ -332,16 +416,25 @@
             if (!gameStarted) return;
 
             let moved = false;
-            if (keys['w'] || keys['arrowup']) { player.y -= player.speed; moved = true; }
-            if (keys['s'] || keys['arrowdown']) { player.y += player.speed; moved = true; }
-            if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; moved = true; }
-            if (keys['d'] || keys['arrowright']) { player.x += player.speed; moved = true; }
+
+            if (controlType === 'pc') {
+                if (keys['w'] || keys['arrowup']) { player.y -= player.speed; moved = true; }
+                if (keys['s'] || keys['arrowdown']) { player.y += player.speed; moved = true; }
+                if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; moved = true; }
+                if (keys['d'] || keys['arrowright']) { player.x += player.speed; moved = true; }
+            } else {
+                // Рух від джойстика на телефоні
+                if (joystickMove.x !== 0 || joystickMove.y !== 0) {
+                    player.x += joystickMove.x * player.speed;
+                    player.y += joystickMove.y * player.speed;
+                    moved = true;
+                }
+            }
 
             if (moved) {
                 socket.emit('player-move', { x: player.x, y: player.y, color: player.color, name: player.name });
             }
 
-            // Плавна інтерполяція (згладжування) руху інших гравців для топової візуалізації
             for (let id in enemies) {
                 let en = enemies[id];
                 en.x += (en.targetX - en.x) * 0.2;
@@ -350,14 +443,12 @@
         }
 
         function draw() {
-            // Розкішний насичений фон галявини
             ctx.fillStyle = '#1c3d14';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.save();
             ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
 
-            // Анімація вітру для трави
             const time = Date.now() / 350;
             grassBlades.forEach((blade, index) => {
                 ctx.strokeStyle = blade.color;
@@ -369,42 +460,37 @@
                 ctx.stroke();
             });
 
-            // Малюємо тіні та інших гравців
+            // Малюємо інших гравців
             for (let id in enemies) {
                 let en = enemies[id];
                 
-                // Тінь під кубиком
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
                 ctx.beginPath();
                 ctx.ellipse(en.x, en.y + 16, 16, 8, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Сам кубик ворога
                 ctx.fillStyle = en.color;
                 ctx.shadowColor = 'rgba(0,0,0,0.4)';
                 ctx.shadowBlur = 10;
                 ctx.fillRect(en.x - 17, en.y - 17, 34, 34);
-                ctx.shadowBlur = 0; // скидаємо тінь
+                ctx.shadowBlur = 0;
 
-                // Обведення кубика для стилю
                 ctx.strokeStyle = '#ffffff';
                 ctx.lineWidth = 1.5;
                 ctx.strokeRect(en.x - 17, en.y - 17, 34, 34);
 
-                // Нікнейм над кубиком
                 ctx.fillStyle = '#ffffff';
                 ctx.font = 'bold 13px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(en.name, en.x, en.y - 26);
             }
 
-            // Тінь нашого гравця
+            // Наш гравець
             ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
             ctx.beginPath();
             ctx.ellipse(player.x, player.y + 16, 16, 8, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Наш кубик із м'яким світінням/тінню
             ctx.fillStyle = player.color;
             ctx.shadowColor = 'rgba(0,0,0,0.5)';
             ctx.shadowBlur = 12;
@@ -415,7 +501,6 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(player.x - 17, player.y - 17, 34, 34);
 
-            // Наш нікнейм
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 13px sans-serif';
             ctx.textAlign = 'center';

@@ -1,362 +1,244 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>GrassBox 2D</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #112211;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      background: #172b17;
-    }
-
-    /* Інфо-панель */
-    .hud {
-      position: absolute;
-      top: 12px; left: 12px;
-      background: rgba(0,0,0,0.65);
-      color: #fff;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      backdrop-filter: blur(4px);
-      z-index: 10;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    /* Чат */
-    #chat-box {
-      position: absolute;
-      bottom: 15px; left: 15px;
-      width: 280px;
-      background: rgba(0,0,0,0.7);
-      border-radius: 8px;
-      padding: 8px;
-      z-index: 10;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    #chat-messages {
-      height: 100px;
-      overflow-y: auto;
-      font-size: 12px;
-      color: #fff;
-      margin-bottom: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    #chat-messages div { word-break: break-word; }
-    #chat-input-container { display: flex; gap: 4px; }
-    #chat-input {
-      flex: 1;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: #fff;
-      padding: 5px 8px;
-      border-radius: 4px;
-      outline: none;
-      font-size: 12px;
-    }
-    #chat-send {
-      background: #2e7d32;
-      border: none;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    /* Кнопка EULA */
-    #eula-btn {
-      position: absolute;
-      bottom: 15px; right: 15px;
-      background: rgba(0,0,0,0.65);
-      color: #ccc;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      z-index: 10;
-      backdrop-filter: blur(4px);
-    }
-    #eula-btn:hover { color: #fff; border-color: #fff; }
-
-    /* Сенсорне керування для телефонів */
-    #touch-controls {
-      display: none;
-      position: absolute;
-      bottom: 25px; right: 25px;
-      width: 130px; height: 130px;
-      z-index: 15;
-    }
-    .touch-btn {
-      position: absolute;
-      width: 40px; height: 40px;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.4);
-      border-radius: 50%;
-      color: white;
-      font-size: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      touch-action: manipulation;
-    }
-    #btn-up { top: 0; left: 45px; }
-    #btn-down { bottom: 0; left: 45px; }
-    #btn-left { top: 45px; left: 0; }
-    #btn-right { top: 45px; right: 0; }
-
-    /* Модальне вікно EULA */
-    #modal {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 100;
-      padding: 20px;
-      flex-direction: column;
-    }
-    #modal-content {
-      flex: 1;
-      overflow-y: auto;
-      background: #1e1e1e;
-      color: #ddd;
-      padding: 15px;
-      border-radius: 6px;
-      font-size: 13px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
-    #modal-close {
-      margin-top: 10px;
-      align-self: flex-end;
-      background: #c62828;
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GrassBox - Multiplayer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #2e5a1e;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            color: #fff;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            pointer-events: none;
+            z-index: 10;
+        }
+        #chat-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            max-height: 200px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            border-radius: 8px 8px 0 0;
+            color: #fff;
+            font-size: 14px;
+            max-height: 150px;
+            word-break: break-all;
+        }
+        #chat-form {
+            display: flex;
+        }
+        #chat-input {
+            flex-grow: 1;
+            padding: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 0 0 0 8px;
+            outline: none;
+            font-size: 14px;
+        }
+        #chat-send {
+            padding: 8px 12px;
+            border: none;
+            background: #4CAF50;
+            color: white;
+            border-radius: 0 0 8px 0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+    <!-- Підключаємо Socket.IO клієнтську бібліотеку -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 </head>
 <body>
 
-<canvas id="gameCanvas"></canvas>
+    <div id="ui">Онлайн: <span id="online-count">1</span></div>
 
-<div class="hud">
-  Позиція: X: <span id="pos-x">0</span>, Y: <span id="pos-y">0</span> | Онлайн: <span id="online-count">1</span>
-</div>
+    <canvas id="gameCanvas"></canvas>
 
-<div id="chat-box">
-  <div id="chat-messages">
-    <div style="color:#aaa;">Ласкаво просимо до GrassBox!</div>
-  </div>
-  <div id="chat-input-container">
-    <input type="text" id="chat-input" placeholder="Напишіть..." maxlength="100">
-    <button id="chat-send">></button>
-  </div>
-</div>
+    <div id="chat-container">
+        <div id="chat-messages"></div>
+        <form id="chat-form" onsubmit="sendChatMessage(event)">
+            <input type="text" id="chat-input" placeholder="Написати в чат..." autocomplete="off" maxlength="100">
+            <button type="submit" id="chat-send">💬</button>
+        </form>
+    </div>
 
-<button id="eula-btn">Правила / EULA</button>
+    <script>
+        // Підключаємося до нашого 24/7 хмарного сервера на Render
+        const socket = io('https://grassbox-yv7s.onrender.com');
 
-<div id="touch-controls">
-  <div class="touch-btn" id="btn-up">W</div>
-  <div class="touch-btn" id="btn-down">S</div>
-  <div class="touch-btn" id="btn-left">A</div>
-  <div class="touch-btn" id="btn-right">D</div>
-</div>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
-<div id="modal">
-  <div id="modal-content">Завантаження правил...</div>
-  <button id="modal-close">Закрити</button>
-</div>
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script>
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
+        // Позиція нашого гравця
+        let player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: 30,
+            speed: 4,
+            color: '#e53935'
+        };
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    initGrass();
-  }
+        // Словник інших гравців онлайн
+        const enemies = {};
 
-  // Гравець (Кубик)
-  const player = {
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2,
-    size: 22,
-    speed: 4,
-    color: '#e53935'
-  };
+        // Генерація декоративної трави на фоні (органічна щільність)
+        const grassBlades = [];
+        for (let i = 0; i < 300; i++) {
+            grassBlades.push({
+                x: Math.random() * 3000 - 1000,
+                y: Math.random() * 3000 - 1000,
+                height: 15 + Math.random() * 20,
+                color: Math.random() > 0.5 ? '#3b7a2e' : '#4d9a3d'
+            });
+        }
 
-  const keys = {};
+        // Керування клавіатурою (WASD / Стрілки)
+        const keys = {};
+        window.addEventListener('keydown', (e) => { keys[e.key.toLowerCase()] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
-  // Спокійні природні відтінки трави
-  const grassColors = [
-    '#255c25',
-    '#2d6a2d',
-    '#357a35',
-    '#3b8a3b'
-  ];
+        // Обробка подій сервера
+        socket.on('update-online', (count) => {
+            document.getElementById('online-count').innerText = count;
+        });
 
-  let grassBlades = [];
-  function initGrass() {
-    grassBlades = [];
-    const count = Math.floor((canvas.width * canvas.height) / 320); 
-    for (let i = 0; i < count; i++) {
-      grassBlades.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        height: 14 + Math.random() * 8,
-        offset: Math.random() * Math.PI * 2, // Фаза для вітру
-        stepSpeed: 0.03 + Math.random() * 0.03, // Швидкість коливання
-        bend: 0,
-        color: grassColors[Math.floor(Math.random() * grassColors.length)],
-        thickness: 1 + Math.random() * 0.5
-      });
-    }
-  }
+        socket.on('enemy-move', (data) => {
+            if (!enemies[data.id]) {
+                enemies[data.id] = { x: data.x, y: data.y, color: '#3f51b5' };
+            } else {
+                enemies[data.id].x = data.x;
+                enemies[data.id].y = data.y;
+            }
+        });
 
-  window.addEventListener('resize', resizeCanvas);
+        socket.on('player-disconnected', (id) => {
+            delete enemies[id];
+        });
 
-  window.addEventListener('keydown', e => { keys[e.code] = true; keys[e.key.toLowerCase()] = true; });
-  window.addEventListener('keyup', e => { keys[e.code] = false; keys[e.key.toLowerCase()] = false; });
+        socket.on('chat-message', (data) => {
+            const chatMessages = document.getElementById('chat-messages');
+            const msgEl = document.createElement('div');
+            msgEl.innerHTML = `<b>${data.id.substring(0, 4)}:</b> ${escapeHtml(data.text)}`;
+            chatMessages.appendChild(msgEl);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
 
-  if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) {
-    document.getElementById('touch-controls').style.display = 'block';
-  }
+        function sendChatMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (text) {
+                socket.emit('chat-message', text);
+                input.value = '';
+            }
+        }
 
-  function setupTouchBtn(id, code) {
-    const btn = document.getElementById(id);
-    btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[code] = true; });
-    btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[code] = false; });
-  }
-  setupTouchBtn('btn-up', 'KeyW');
-  setupTouchBtn('btn-down', 'KeyS');
-  setupTouchBtn('btn-left', 'KeyA');
-  setupTouchBtn('btn-right', 'KeyD');
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
 
-  let windTimer = 0;
+        // Головний ігровий цикл
+        function update() {
+            let moved = false;
+            if (keys['w'] || keys['arrowup']) { player.y -= player.speed; moved = true; }
+            if (keys['s'] || keys['arrowdown']) { player.y += player.speed; moved = true; }
+            if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; moved = true; }
+            if (keys['d'] || keys['arrowright']) { player.x += player.speed; moved = true; }
 
-  function update() {
-    if (keys['KeyA'] || keys['a']) player.x += player.speed;
-    if (keys['KeyD'] || keys['d']) player.x -= player.speed;
-    if (keys['KeyW'] || keys['w']) player.y -= player.speed;
-    if (keys['KeyS'] || keys['s']) player.y += player.speed;
+            if (moved) {
+                socket.emit('player-move', { x: player.x, y: player.y });
+            }
+        }
 
-    player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
-    player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+        function draw() {
+            ctx.fillStyle = '#2e5a1e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    document.getElementById('pos-x').textContent = Math.round(player.x);
-    document.getElementById('pos-y').textContent = Math.round(player.y);
+            // Зміщення камери за гравцем
+            ctx.save();
+            ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
 
-    windTimer += 0.04; // Час для коливання від вітру
+            // Малюємо траву з вітровою анімацією
+            const time = Date.now() / 300;
+            grassBlades.forEach((blade, index) => {
+                ctx.strokeStyle = blade.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(blade.x, blade.y);
+                let wind = Math.sin(time + index) * 5;
+                ctx.quadraticCurveTo(blade.x + wind / 2, blade.y - blade.height / 2, blade.x + wind, blade.y - blade.height);
+                ctx.stroke();
+            });
 
-    const pCenterX = player.x + player.size / 2;
-    const pCenterY = player.y + player.size / 2;
+            // Малюємо інших гравців
+            for (let id in enemies) {
+                let en = enemies[id];
+                ctx.fillStyle = en.color;
+                ctx.fillRect(en.x - 15, en.y - 15, 30, 30);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.fillText(id.substring(0, 4), en.x - 12, en.y - 20);
+            }
 
-    grassBlades.forEach(blade => {
-      // Природне коливання право-ліво від вітру
-      const windSway = Math.sin(windTimer + blade.offset) * 4;
+            // Малюємо нашого гравця (кубик)
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x - 15, player.y - 15, 30, 30);
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.fillText('Я', player.x - 6, player.y - 20);
 
-      const dist = Math.hypot(blade.x - pCenterX, blade.y - pCenterY);
-      if (dist < 30) {
-        // Коли кубик наступає, трава гнеться від нього
-        const push = (blade.x < pCenterX ? -1 : 1) * (30 - dist) * 0.5;
-        blade.bend = push;
-      } else {
-        // Повернення до коливання вітром
-        blade.bend += (windSway - blade.bend) * 0.1;
-      }
-    });
-  }
+            ctx.restore();
+        }
 
-  function draw() {
-    ctx.fillStyle = '#132213';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
 
-    grassBlades.forEach(blade => {
-      ctx.strokeStyle = blade.color;
-      ctx.lineWidth = blade.thickness;
-      ctx.beginPath();
-      ctx.moveTo(blade.x, blade.y);
-      // Малюємо з урахуванням згину (вітер / наступи)
-      const tipX = blade.x + blade.bend;
-      const tipY = blade.y - blade.height;
-      ctx.lineTo(tipX, tipY);
-      ctx.stroke();
-    });
-
-    // Кубик
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.size, player.size);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(player.x, player.y, player.size, player.size);
-  }
-
-  function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-  }
-
-  resizeCanvas();
-  gameLoop();
-
-  const chatInput = document.getElementById('chat-input');
-  const chatSend = document.getElementById('chat-send');
-  const chatMessages = document.getElementById('chat-messages');
-
-  function sendMessage() {
-    const text = chatInput.value.trim();
-    if (!text) return;
-    const msg = document.createElement('div');
-    msg.textContent = `Ви: ${text}`;
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    chatInput.value = '';
-  }
-
-  chatSend.addEventListener('click', sendMessage);
-  chatInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendMessage();
-  });
-
-  const modal = document.getElementById('modal');
-  const modalContent = document.getElementById('modal-content');
-  const eulaBtn = document.getElementById('eula-btn');
-  const modalClose = document.getElementById('modal-close');
-
-  eulaBtn.addEventListener('click', async () => {
-    modal.style.display = 'flex';
-    try {
-      const res = await fetch('RULES_AND_EULA.txt');
-      const text = await res.text();
-      modalContent.textContent = text;
-    } catch {
-      modalContent.textContent = "Не вдалося завантажити RULES_AND_EULA.txt";
-    }
-  });
-
-  modalClose.addEventListener('click', () => { modal.style.display = 'none'; });
-</script>
+        loop();
+    </script>
 </body>
 </html>

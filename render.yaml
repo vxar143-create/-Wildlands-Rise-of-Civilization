@@ -1,0 +1,1 @@
+services:\n  - type: web\n    name: wildlands-rise-of-civilization\n    runtime: node\n    plan: free\n    rootDir: Server\n    buildCommand: npm install\n    startCommand: node server.js\n

@@ -1,85 +1,295 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <meta name="theme-color" content="#17251d">
-  <title>Wildlands — Rise of Civilization</title>
-  <link rel="stylesheet" href="./style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <meta name="theme-color" content="#17251d">
+    <title>Wildlands — Rise of Civilization</title>
+
+    <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
-  <div id="joinScreen" class="overlay">
-    <div class="join-card">
-      <div class="logo-mark">W</div>
-      <p class="eyebrow">ОНЛАЙН-СВІТ ВИЖИВАННЯ</p>
-      <h1>WILDLANDS</h1>
-      <p class="muted">Досліджуй. Збирай. Будуй цивілізацію.</p>
-      <label for="nickname">Твій нікнейм</label>
-      <input id="nickname" maxlength="18" placeholder="Мандрівник" autocomplete="nickname">
-      <label>Колір персонажа</label>
-      <div class="colors" id="colors">
-        <button class="color-choice selected" data-color="#73d68b" style="--c:#73d68b" aria-label="Зелений"></button>
-        <button class="color-choice" data-color="#7db7ff" style="--c:#7db7ff" aria-label="Синій"></button>
-        <button class="color-choice" data-color="#f2c46d" style="--c:#f2c46d" aria-label="Жовтий"></button>
-        <button class="color-choice" data-color="#d99bff" style="--c:#d99bff" aria-label="Фіолетовий"></button>
-        <button class="color-choice" data-color="#ff8f8f" style="--c:#ff8f8f" aria-label="Червоний"></button>
-      </div>
-      <button id="playBtn" class="primary">Увійти у світ</button>
-      <p class="tiny">Перший прототип • Збереження на сервері</p>
+
+    <!-- ЕКРАН ВХОДУ -->
+    <div id="joinScreen" class="overlay">
+        <div class="join-card">
+
+            <div class="logo-mark">W</div>
+
+            <p class="eyebrow">ОНЛАЙН-СВІТ ВИЖИВАННЯ</p>
+
+            <h1>WILDLANDS</h1>
+
+            <p class="muted">
+                Досліджуй. Збирай. Будуй цивілізацію.
+            </p>
+
+            <label for="nickname">Твій нікнейм</label>
+
+            <input
+                id="nickname"
+                maxlength="18"
+                placeholder="Мандрівник"
+                autocomplete="nickname"
+            >
+
+            <label>Колір персонажа</label>
+
+            <div class="colors" id="colors">
+
+                <button
+                    class="color-choice selected"
+                    data-color="#73d68b"
+                    style="--c:#73d68b"
+                    aria-label="Зелений">
+                </button>
+
+                <button
+                    class="color-choice"
+                    data-color="#7db7ff"
+                    style="--c:#7db7ff"
+                    aria-label="Синій">
+                </button>
+
+                <button
+                    class="color-choice"
+                    data-color="#f2c46d"
+                    style="--c:#f2c46d"
+                    aria-label="Жовтий">
+                </button>
+
+                <button
+                    class="color-choice"
+                    data-color="#d99bff"
+                    style="--c:#d99bff"
+                    aria-label="Фіолетовий">
+                </button>
+
+                <button
+                    class="color-choice"
+                    data-color="#ff8f8f"
+                    style="--c:#ff8f8f"
+                    aria-label="Червоний">
+                </button>
+
+            </div>
+
+            <button id="playBtn" class="primary">
+                Увійти у світ
+            </button>
+
+            <p id="joinError"
+               style="color:#ff9999; min-height:20px; font-size:13px;">
+            </p>
+
+            <p class="tiny">
+                Перший прототип • Онлайн-сервер
+            </p>
+
+        </div>
     </div>
-  </div>
 
-  <main id="game" class="hidden">
-    <canvas id="world"></canvas>
-    <header class="topbar">
-      <div class="brand"><span class="brand-icon">W</span><span>WILDLANDS</span></div>
-      <div class="world-status"><span class="online-dot"></span><span id="onlineCount">1 онлайн</span><span class="sep">•</span><span id="timeLabel">День</span></div>
-      <button id="helpBtn" class="icon-btn" title="Допомога">?</button>
-    </header>
 
-    <section class="hud-left">
-      <div class="panel player-panel">
-        <div class="panel-title">МАНДРІВНИК</div>
-        <div class="player-name" id="playerName">Гравець</div>
-        <div class="stat-line"><span>🌲 Деревина</span><b id="woodCount">0</b></div>
-        <div class="stat-line"><span>🪨 Камінь</span><b id="stoneCount">0</b></div>
-        <div class="stat-line"><span>🫐 Ягоди</span><b id="berryCount">0</b></div>
-        <div class="stat-line"><span>📍 Координати</span><b id="coords">0, 0</b></div>
-      </div>
-      <div class="panel biome-panel"><span class="panel-title">МІСЦЕВІСТЬ</span><b id="biomeName">Ліс</b></div>
-    </section>
+    <!-- ІГРОВИЙ СВІТ -->
+    <main id="game" class="hidden">
 
-    <section class="hud-right">
-      <div class="panel mini-panel"><span class="panel-title">ГРАВЦІ</span><div id="playerList">Очікування…</div></div>
-      <div class="panel chat-panel">
-        <div class="panel-title">ЧАТ СВІТУ</div>
-        <div id="chatMessages" class="chat-messages"></div>
-        <form id="chatForm"><input id="chatInput" maxlength="180" placeholder="Написати…"><button>➤</button></form>
-      </div>
-    </section>
+        <canvas id="world"></canvas>
 
-    <div class="bottom-hint" id="hint">WASD / стрілки — рух • Підійди до ресурсу та натисни «Зібрати»</div>
-    <div class="mobile-controls">
-      <div class="dpad">
-        <button data-dir="up">▲</button>
-        <div><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div>
-      </div>
-      <button id="gatherBtn" class="gather-btn">ЗІБРАТИ</button>
+        <!-- ВЕРХНЯ ПАНЕЛЬ -->
+        <header class="topbar">
+
+            <div class="brand">
+                <span class="brand-icon">W</span>
+                <span>WILDLANDS</span>
+            </div>
+
+            <div class="world-status">
+
+                <span class="online-dot"></span>
+
+                <span id="onlineCount">1 онлайн</span>
+
+                <span class="sep">•</span>
+
+                <span id="timeLabel">День</span>
+
+            </div>
+
+            <button id="helpBtn" class="icon-btn" title="Допомога">
+                ?
+            </button>
+
+        </header>
+
+
+        <!-- ЛІВА ПАНЕЛЬ -->
+        <section class="hud-left">
+
+            <div class="panel player-panel">
+
+                <div class="panel-title">
+                    МАНДРІВНИК
+                </div>
+
+                <div class="player-name" id="playerName">
+                    Гравець
+                </div>
+
+                <div class="stat-line">
+                    <span>🌲 Деревина</span>
+                    <b id="woodCount">0</b>
+                </div>
+
+                <div class="stat-line">
+                    <span>🪨 Камінь</span>
+                    <b id="stoneCount">0</b>
+                </div>
+
+                <div class="stat-line">
+                    <span>🫐 Ягоди</span>
+                    <b id="berryCount">0</b>
+                </div>
+
+                <div class="stat-line">
+                    <span>📍 Координати</span>
+                    <b id="coords">0, 0</b>
+                </div>
+
+            </div>
+
+
+            <div class="panel biome-panel">
+
+                <span class="panel-title">
+                    МІСЦЕВІСТЬ
+                </span>
+
+                <b id="biomeName">Ліс</b>
+
+            </div>
+
+        </section>
+
+
+        <!-- ПРАВА ПАНЕЛЬ -->
+        <section class="hud-right">
+
+            <div class="panel mini-panel">
+
+                <span class="panel-title">
+                    ГРАВЦІ
+                </span>
+
+                <div id="playerList">
+                    Очікування…
+                </div>
+
+            </div>
+
+
+            <div class="panel chat-panel">
+
+                <div class="panel-title">
+                    ЧАТ СВІТУ
+                </div>
+
+                <div id="chatMessages" class="chat-messages">
+                </div>
+
+                <form id="chatForm">
+
+                    <input
+                        id="chatInput"
+                        maxlength="180"
+                        placeholder="Написати…"
+                        autocomplete="off"
+                    >
+
+                    <button type="submit">➤</button>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- ПІДКАЗКА -->
+        <div class="bottom-hint" id="hint">
+            WASD / стрілки — рух • Підійди до ресурсу та натисни «Зібрати»
+        </div>
+
+
+        <!-- МОБІЛЬНЕ КЕРУВАННЯ -->
+        <div class="mobile-controls">
+
+            <div class="dpad">
+
+                <button data-dir="up">▲</button>
+
+                <div>
+                    <button data-dir="left">◀</button>
+                    <button data-dir="down">▼</button>
+                    <button data-dir="right">▶</button>
+                </div>
+
+            </div>
+
+            <button id="gatherBtn" class="gather-btn">
+                ЗІБРАТИ
+            </button>
+
+        </div>
+
+
+        <div id="toast" class="toast"></div>
+
+    </main>
+
+
+    <!-- ВІКНО ДОПОМОГИ -->
+    <div id="helpModal" class="overlay hidden">
+
+        <div class="join-card help-card">
+
+            <button id="closeHelp" class="close-btn">
+                ×
+            </button>
+
+            <h2>Як грати</h2>
+
+            <p>
+                Рухайся клавішами WASD або стрілками.
+                На телефоні використовуй кнопки внизу.
+            </p>
+
+            <p>
+                Підійди до дерева, каменю чи ягідного куща
+                та натисни ЗІБРАТИ.
+            </p>
+
+            <p>
+                Карта процедурна: різні ділянки мають
+                різні біоми.
+            </p>
+
+            <button id="closeHelp2" class="primary">
+                Зрозуміло
+            </button>
+
+        </div>
+
     </div>
-    <div id="toast" class="toast"></div>
-  </main>
 
-  <div id="helpModal" class="overlay hidden">
-    <div class="join-card help-card">
-      <button id="closeHelp" class="close-btn">×</button>
-      <h2>Як грати</h2>
-      <p>Рухайся клавішами WASD або стрілками. На телефоні використовуй кнопки внизу.</p>
-      <p>Підійди до дерева, каменю чи ягідного куща та натисни <b>ЗІБРАТИ</b>.</p>
-      <p>Карта процедурна: різні ділянки мають різні біоми. Це рання основа майбутньої великої гри.</p>
-      <button id="closeHelp2" class="primary">Зрозуміло</button>
-    </div>
-  </div>
-  <script src="https://wildlands-rise-of-civilization.onrender.com/socket.io/socket.io.js"></script>
-  <script src="./game.js"></script>
+
+    <!-- ПІДКЛЮЧЕННЯ ДО RENDER -->
+    <script src="https://wildlands-rise-of-civilization.onrender.com/socket.io/socket.io.js"></script>
+
+    <!-- ОСНОВНИЙ КОД ГРИ -->
+    <script src="./game.js"></script>
+
 </body>
 </html>

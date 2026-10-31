@@ -1,0 +1,19 @@
+{
+  "name": "wildlands-online",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Wildlands - multiplayer survival and settlement sandbox",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
